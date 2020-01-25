@@ -1,6 +1,5 @@
 package com.excalibur.ftp.controller;
 
-import com.excalibur.ftp.service.FTPServiceUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.excalibur.ftp.dao.response.body.FTPStoreResult;
@@ -27,7 +26,7 @@ public class FileRestController {
 
     @RequestMapping(method = RequestMethod.GET, value = "/system/avatar")
     public byte[] getDefaultAvatar() {
-        return ftpService.retrieveFile("/system/avatar", FTPServiceUtils.defaultAvatarName);
+        return ftpService.retrieveFile("/system/avatar", ftpService.getDefaultAvatarName());
     }
 
 

@@ -1,6 +1,8 @@
 package com.excalibur.ftp.service;
 
 import com.excalibur.ftp.dao.response.body.FTPStoreResult;
+import com.excalibur.ftp.util.FTPConfig;
+import com.excalibur.ftp.util.FTPUtils;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
@@ -13,27 +15,22 @@ import java.util.*;
 @Service
 public class FTPService {
 
-    private String serverName;
-    private int serverPort;
-    private String userName;
-    private String userPass;
-    private static final String ROOT_DIR = "/";
+    private FTPConfig ftpConfig;
     private FTPClient ftpClient;
 //    private ReentrantLock lock;
 //    private FTPNoOpThread noOpThread;
 
     FTPService() {
-        Properties properties = new Properties();
-        try (InputStream stream = new FileInputStream("src/main/resources/application.properties")) {
-            properties.load(stream);
-            serverName = properties.getProperty("FTPServer.name");
-            serverPort = Integer.valueOf(properties.getProperty("FTPServer.port"));
-            userName = properties.getProperty("FTPServer.user.name");
-            userPass = properties.getProperty("FTPServer.user.password");
+        try {
+            ftpConfig = new FTPConfig();
             startNewSession();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public String getDefaultAvatarName() {
+        return ftpConfig.getDefaultAvatarName();
     }
 
     public byte[] retrieveFile(String dirName) {
@@ -242,7 +239,7 @@ public class FTPService {
    }
 
    private Boolean changeToRootDir() throws IOException{
-        return ftpClient.changeWorkingDirectory(ROOT_DIR);
+        return ftpClient.changeWorkingDirectory(ftpConfig.getRootDir());
    }
 
 //   private void startNoOpThread() {
@@ -253,9 +250,9 @@ public class FTPService {
 
    private void startNewSession() throws IOException {
        ftpClient = new FTPClient();
-       ftpClient.connect(serverName, serverPort);
+       ftpClient.connect(ftpConfig.getServerName(), ftpConfig.getServerPort());
        if (ftpClient.isConnected()) {
-           if (ftpClient.login(userName, userPass)) {
+           if (ftpClient.login(ftpConfig.getUserName(), ftpConfig.getUserPass())) {
 //               startNoOpThread();
            } else {
                throw new IOException("LOGIN FAILED");
