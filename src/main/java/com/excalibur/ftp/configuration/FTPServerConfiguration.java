@@ -1,19 +1,19 @@
-package com.excalibur.ftp.util;
+package com.excalibur.ftp.configuration;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-public class FTPUtils {
+public class FTPServerConfiguration {
 
     private static String serverName;
     private static int serverPort;
     private static String userName;
     private static String userPass;
     private static String defaultAvatarName;
-    private static final String ROOT_DIR = "/";
-
+    private static String defaultAvatarDirectory;
+    private static String rootDirectory;
 
     static {
         Properties properties = new Properties();
@@ -24,6 +24,8 @@ public class FTPUtils {
             userName = properties.getProperty("FTPServer.user.name");
             userPass = properties.getProperty("FTPServer.user.password");
             defaultAvatarName = properties.getProperty("FTPServer.system.default.avatar.name");
+            defaultAvatarDirectory = properties.getProperty("FTPServer.system.default.avatar.directory");
+            rootDirectory = properties.getProperty("FTPServer.directory.root.name");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -34,7 +36,7 @@ public class FTPUtils {
     }
 
     public static void setServerName(String serverName) {
-        FTPUtils.serverName = serverName;
+        FTPServerConfiguration.serverName = serverName;
     }
 
     public static int getServerPort() {
@@ -42,7 +44,7 @@ public class FTPUtils {
     }
 
     public static void setServerPort(int serverPort) {
-        FTPUtils.serverPort = serverPort;
+        FTPServerConfiguration.serverPort = serverPort;
     }
 
     public static String getUserName() {
@@ -50,7 +52,7 @@ public class FTPUtils {
     }
 
     public static void setUserName(String userName) {
-        FTPUtils.userName = userName;
+        FTPServerConfiguration.userName = userName;
     }
 
     public static String getUserPass() {
@@ -58,7 +60,7 @@ public class FTPUtils {
     }
 
     public static void setUserPass(String userPass) {
-        FTPUtils.userPass = userPass;
+        FTPServerConfiguration.userPass = userPass;
     }
 
     public static String getDefaultAvatarName() {
@@ -66,10 +68,18 @@ public class FTPUtils {
     }
 
     public static void setDefaultAvatarName(String defaultAvatarName) {
-        FTPUtils.defaultAvatarName = defaultAvatarName;
+        FTPServerConfiguration.defaultAvatarName = defaultAvatarName;
     }
 
-    public static String getRootDir() {
-        return ROOT_DIR;
+    public static String getRootDirectory() {
+        return rootDirectory;
+    }
+
+    public static void setRootDirectory(String rootDirectory) {
+        FTPServerConfiguration.rootDirectory = rootDirectory;
+    }
+
+    public static String getDefaultAvatarDirectory() {
+        return defaultAvatarDirectory;
     }
 }

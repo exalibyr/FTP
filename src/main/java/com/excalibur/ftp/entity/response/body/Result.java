@@ -1,4 +1,6 @@
-package com.excalibur.ftp.dao.response.body;
+package com.excalibur.ftp.entity.response.body;
+
+import org.springframework.security.crypto.encrypt.TextEncryptor;
 
 import java.util.List;
 

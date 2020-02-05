@@ -1,36 +1,33 @@
-package com.excalibur.ftp.service;
+package com.excalibur.ftp.service.Impl;
 
-import com.excalibur.ftp.dao.response.body.FTPStoreResult;
-import com.excalibur.ftp.util.FTPConfig;
-import com.excalibur.ftp.util.FTPUtils;
+import com.excalibur.ftp.configuration.FTPServerConfiguration;
+import com.excalibur.ftp.entity.response.body.FTPStoreResult;
+import com.excalibur.ftp.service.FTPServerService;
+import com.excalibur.ftp.util.ApplicationUtils;
+import com.excalibur.ftp.util.UUIDGenerator;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPFileFilters;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.*;
 
 @Service
-public class FTPService {
+public class FTPServerServiceImpl implements FTPServerService {
 
-    private FTPConfig ftpConfig;
     private FTPClient ftpClient;
 //    private ReentrantLock lock;
 //    private FTPNoOpThread noOpThread;
 
-    FTPService() {
+    FTPServerServiceImpl() {
         try {
-            ftpConfig = new FTPConfig();
             startNewSession();
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public String getDefaultAvatarName() {
-        return ftpConfig.getDefaultAvatarName();
     }
 
     public byte[] retrieveFile(String dirName) {
@@ -80,6 +77,8 @@ public class FTPService {
             if (changeToRootDir()) {
                 if (ftpClient.changeWorkingDirectory(dirName)) {
                     return retrieveSingleFile(fileName);
+                } else if (ftpClient.changeWorkingDirectory(FTPServerConfiguration.getDefaultAvatarDirectory())) {
+                    return retrieveSingleFile(FTPServerConfiguration.getDefaultAvatarName());
                 } else {
                     throw new IOException(ftpClient.printWorkingDirectory() + " - CHANGE TO " + dirName + " DIR FAILED");
                 }
@@ -97,7 +96,8 @@ public class FTPService {
     private byte[] retrieveSingleFile(String fileName) throws IOException {
         InputStream stream = ftpClient.retrieveFileStream(fileName);
         if (stream == null) {
-            throw new IOException(ftpClient.printWorkingDirectory() + " - RETRIEVE " + fileName + " FILE FAILED");
+            return retrieveFile(FTPServerConfiguration.getDefaultAvatarDirectory(), FTPServerConfiguration.getDefaultAvatarName());
+//            throw new IOException(ftpClient.printWorkingDirectory() + " - RETRIEVE " + fileName + " FILE FAILED");
         } else {
             byte[] content = stream.readAllBytes();
             stream.close();
@@ -239,7 +239,7 @@ public class FTPService {
    }
 
    private Boolean changeToRootDir() throws IOException{
-        return ftpClient.changeWorkingDirectory(ftpConfig.getRootDir());
+        return ftpClient.changeWorkingDirectory(FTPServerConfiguration.getRootDirectory());
    }
 
 //   private void startNoOpThread() {
@@ -250,9 +250,9 @@ public class FTPService {
 
    private void startNewSession() throws IOException {
        ftpClient = new FTPClient();
-       ftpClient.connect(ftpConfig.getServerName(), ftpConfig.getServerPort());
+       ftpClient.connect(FTPServerConfiguration.getServerName(), FTPServerConfiguration.getServerPort());
        if (ftpClient.isConnected()) {
-           if (ftpClient.login(ftpConfig.getUserName(), ftpConfig.getUserPass())) {
+           if (ftpClient.login(FTPServerConfiguration.getUserName(), FTPServerConfiguration.getUserPass())) {
 //               startNoOpThread();
            } else {
                throw new IOException("LOGIN FAILED");
@@ -274,6 +274,20 @@ public class FTPService {
         throw new IOException("TRANSACTION INTERRUPTED!!! DISCONNECTED");
    }
 
+    @Override
+    public void deleteFile(String directory, String name) {
 
+    }
 
+    @Override
+    public FTPStoreResult createUserFile(String userId, MultipartFile file) throws IOException {
+        userId = ApplicationUtils.getEncryptor().decrypt(userId);
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
+        UUID uuid = UUIDGenerator.generateType5UUID(UUID.randomUUID().toString(), userId);
+        String generatedFilename = uuid.toString() + extension;
+        FTPStoreResult storeResult = storeFile("user/" + userId, generatedFilename, file.getBytes());
+        storeResult.setUserId(ApplicationUtils.getEncryptor().encrypt(userId));
+        return storeResult;
+    }
 }
