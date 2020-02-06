@@ -7,21 +7,22 @@ public class FTPStoreResult extends Result {
     private String userId;
     private String fileName;
 
-    public FTPStoreResult(boolean success, String fileName, List<String> errors) {
+    public FTPStoreResult(boolean success, String fileName, String userId, List<String> errors) {
         super(success, errors);
         this.fileName = fileName;
+        this.userId = userId;
     }
 
     public String getUserId() {
         return userId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
-    }
-
     public String getFileName() {
         return fileName;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public void setFileName(String fileName) {
