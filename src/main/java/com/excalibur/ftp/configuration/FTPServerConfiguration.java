@@ -11,9 +11,9 @@ public class FTPServerConfiguration {
     private static int serverPort;
     private static String userName;
     private static String userPass;
-    private static String defaultAvatarName;
-    private static String defaultAvatarDirectory;
+    private static String systemDirectory;
     private static String rootDirectory;
+    private static String avatarDirectory;
 
     static {
         Properties properties = new Properties();
@@ -23,9 +23,9 @@ public class FTPServerConfiguration {
             serverPort = Integer.parseInt(properties.getProperty("FTPServer.port"));
             userName = properties.getProperty("FTPServer.user.name");
             userPass = properties.getProperty("FTPServer.user.password");
-            defaultAvatarName = properties.getProperty("FTPServer.system.default.avatar.name");
-            defaultAvatarDirectory = properties.getProperty("FTPServer.system.default.avatar.directory");
-            rootDirectory = properties.getProperty("FTPServer.directory.root.name");
+            rootDirectory = properties.getProperty("FTPServer.root.directory");
+            systemDirectory = properties.getProperty("FTPServer.system.directory");
+            avatarDirectory = properties.getProperty("FTPServer.avatar.directory");
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -35,51 +35,27 @@ public class FTPServerConfiguration {
         return serverName;
     }
 
-    public static void setServerName(String serverName) {
-        FTPServerConfiguration.serverName = serverName;
-    }
-
     public static int getServerPort() {
         return serverPort;
-    }
-
-    public static void setServerPort(int serverPort) {
-        FTPServerConfiguration.serverPort = serverPort;
     }
 
     public static String getUserName() {
         return userName;
     }
 
-    public static void setUserName(String userName) {
-        FTPServerConfiguration.userName = userName;
-    }
-
     public static String getUserPass() {
         return userPass;
     }
 
-    public static void setUserPass(String userPass) {
-        FTPServerConfiguration.userPass = userPass;
-    }
-
-    public static String getDefaultAvatarName() {
-        return defaultAvatarName;
-    }
-
-    public static void setDefaultAvatarName(String defaultAvatarName) {
-        FTPServerConfiguration.defaultAvatarName = defaultAvatarName;
+    public static String getSystemDirectory() {
+        return systemDirectory;
     }
 
     public static String getRootDirectory() {
         return rootDirectory;
     }
 
-    public static void setRootDirectory(String rootDirectory) {
-        FTPServerConfiguration.rootDirectory = rootDirectory;
-    }
-
-    public static String getDefaultAvatarDirectory() {
-        return defaultAvatarDirectory;
+    public static String getAvatarDirectory() {
+        return avatarDirectory;
     }
 }

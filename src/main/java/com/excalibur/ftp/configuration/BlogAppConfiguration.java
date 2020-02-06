@@ -7,8 +7,8 @@ import java.util.Properties;
 
 public class BlogAppConfiguration {
 
-    public static final String URL = "http://localhost:8081";
     private static String url;
+    private static String token;
     private static String createFileURN;
     private static String createFileMethod;
 
@@ -17,6 +17,7 @@ public class BlogAppConfiguration {
         try (InputStream stream = new FileInputStream("src/main/resources/properties/blogApp.properties")) {
             properties.load(stream);
             url = properties.getProperty("blog.url");
+            token = properties.getProperty("blog.api.token");
             createFileURN = properties.getProperty("blog.file.create.urn");
             createFileMethod = properties.getProperty("blog.file.create.method");
         } catch (IOException e) {
@@ -34,5 +35,9 @@ public class BlogAppConfiguration {
 
     public static String getCreateFileURI() {
         return url + createFileURN;
+    }
+
+    public static String getToken() {
+        return token;
     }
 }
