@@ -28,6 +28,8 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
         }
     }
 
+
+
     @Override
     public byte[] retrieveFile(String dirName) throws Exception {
         if ( !ftpClient.isConnected()) restoreConnection();
@@ -59,8 +61,19 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
     }
 
     @Override
-    public void deleteFile(String directory, String name) {
-
+    public void deleteFile(String directory, String name) throws Exception {
+        if ( !ftpClient.isConnected()) restoreConnection();
+        if (changeToRootDir()) {
+            if (ftpClient.changeWorkingDirectory(directory)) {
+                return retrieveSingleFile(directory);
+            } else if (ftpClient.changeWorkingDirectory(ApplicationUtils.getSystemAvatarDir())) {
+                return retrieveSingleFile();
+            } else {
+                throw new IOException(ftpClient.printWorkingDirectory() + " - CHANGE TO " + dirName + " DIR FAILED");
+            }
+        } else {
+            throw new IOException(ftpClient.printWorkingDirectory() + " - CHANGE TO " + FTPServerConfiguration.getRootDirectory() + " DIR FAILED");
+        }
     }
 
     @Override
@@ -123,6 +136,13 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
         } catch (IOException e) {
             e.printStackTrace();
             throw new IOException(ftpClient.printWorkingDirectory() + " - STORE " + fileName + " FILE FAILED");
+        }
+    }
+
+    private void deleteSingleFile(String fileName) throws Exception {
+        ftpClient.enterLocalPassiveMode();
+        if ( !ftpClient.deleteFile(fileName)) {
+            throw new IOException(ftpClient.printWorkingDirectory() + " - DELETE " + fileName + " FILE FAILED");
         }
     }
 

@@ -3,6 +3,7 @@ package com.excalibur.ftp.util;
 import com.excalibur.ftp.configuration.BlogAppConfiguration;
 import com.excalibur.ftp.configuration.EncryptionConfiguration;
 import com.excalibur.ftp.configuration.FTPServerConfiguration;
+import org.springframework.lang.Nullable;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 
@@ -41,6 +42,10 @@ public class ApplicationUtils {
 
     public static String getSystemAvatarDir() {
         return FTPServerConfiguration.getSystemDirectory() + FTPServerConfiguration.getAvatarDirectory();
+    }
+
+    public static Boolean validateContentType(@Nullable String contentType) {
+        return contentType != null && (contentType.equals("image/jpeg") || contentType.equals("image/png"));
     }
 
 }

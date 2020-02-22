@@ -7,7 +7,9 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public interface FTPServerService {
 
-    FTPStoreResult createUserFile(String userId, MultipartFile file) throws Exception;
+    String createUserFile(String key, MultipartFile file) throws Exception;
+
+    void deleteFile(String key, String fileName) throws Exception;
 
     byte[] getUserFile(String userId, String filename) throws Exception;
 

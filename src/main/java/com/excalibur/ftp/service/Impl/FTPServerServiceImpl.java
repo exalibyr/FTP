@@ -6,10 +6,12 @@ import com.excalibur.ftp.repository.FTPServerRepository;
 import com.excalibur.ftp.service.FTPServerService;
 import com.excalibur.ftp.util.ApplicationUtils;
 import com.excalibur.ftp.util.UUIDGenerator;
+import org.apache.commons.fileupload.FileUploadBase;
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPFileFilters;
+import org.apache.tomcat.util.http.fileupload.impl.InvalidContentTypeException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,23 +26,26 @@ public class FTPServerServiceImpl implements FTPServerService {
     private FTPServerRepository ftpServerRepository;
 
     @Override
-    public FTPStoreResult createUserFile(String userId, MultipartFile file) throws Exception {
-        String directoryName = ApplicationUtils.getEncryptor().decrypt(userId);
+    public String createUserFile(String key, MultipartFile file) throws Exception {
+        if (ApplicationUtils.validateContentType(file.getContentType())) {
+            throw new InvalidContentTypeException("Wrong content type");
+        }
+
+        String directoryName = ApplicationUtils.getEncryptor().decrypt(key);
 
         String originalFilename = file.getOriginalFilename();
         String extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
 
         UUID uuid = UUIDGenerator.generateType5UUID(UUID.randomUUID().toString(), directoryName);
         String generatedFilename = uuid.toString() + extension;
-        try {
-            ftpServerRepository.storeFile("user/" + directoryName, generatedFilename, file.getBytes());
-            return new FTPStoreResult(true, generatedFilename, userId, null);
-        } catch (IOException e) {
-            e.printStackTrace();
-            List<String> errors = new ArrayList<>();
-            errors.add(e.getMessage());
-            return new FTPStoreResult(false, generatedFilename, userId, errors);
-        }
+        ftpServerRepository.storeFile("user/" + directoryName, generatedFilename, file.getBytes());
+        return generatedFilename;
+    }
+
+    @Override
+    public void deleteFile(String key, String fileName) throws Exception {
+        String directory = ApplicationUtils.getEncryptor().decrypt(key);
+        ftpServerRepository.deleteFile(directory, fileName);
     }
 
     @Override
