@@ -3,10 +3,24 @@ package com.excalibur.ftp.util;
 import com.excalibur.ftp.configuration.BlogAppConfiguration;
 import com.excalibur.ftp.configuration.EncryptionConfiguration;
 import com.excalibur.ftp.configuration.FTPServerConfiguration;
+import org.springframework.lang.Nullable;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.LogManager;
+
 public class ApplicationUtils {
+
+    static {
+        try (InputStream stream = new FileInputStream("src/main/resources/properties/logging.properties")) {
+            LogManager.getLogManager().readConfiguration(stream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public enum Endpoint {
         blog
@@ -41,6 +55,10 @@ public class ApplicationUtils {
 
     public static String getSystemAvatarDir() {
         return FTPServerConfiguration.getSystemDirectory() + FTPServerConfiguration.getAvatarDirectory();
+    }
+
+    public static Boolean validateContentType(@Nullable String contentType) {
+        return contentType != null && (contentType.equals("image/jpeg") || contentType.equals("image/png"));
     }
 
 }

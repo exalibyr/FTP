@@ -14,9 +14,13 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @Repository
 public class FTPServerRepositoryImpl implements FTPServerRepository {
+
+    private Logger logger = Logger.getLogger(FTPServerRepositoryImpl.class.getName());
 
     private FTPClient ftpClient;
 
@@ -25,6 +29,7 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
             startNewSession();
         } catch (Exception e) {
             e.printStackTrace();
+            logger.log(Level.SEVERE, "exception", e);
         }
     }
 
@@ -59,8 +64,19 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
     }
 
     @Override
-    public void deleteFile(String directory, String name) {
-
+    public void deleteFile(String directory, String name) throws Exception {
+        if ( !ftpClient.isConnected()) restoreConnection();
+        if (changeToRootDir()) {
+            if (ftpClient.changeWorkingDirectory(directory)) {
+                if ( !ftpClient.deleteFile(name)) {
+                    throw new IOException(ftpClient.printWorkingDirectory() + " - DELETE " + name + " FILE FAILED");
+                }
+            } else {
+                throw new IOException(ftpClient.printWorkingDirectory() + " - CHANGE TO " + directory + " DIR FAILED");
+            }
+        } else {
+            throw new IOException(ftpClient.printWorkingDirectory() + " - CHANGE TO " + FTPServerConfiguration.getRootDirectory() + " DIR FAILED");
+        }
     }
 
     @Override
@@ -93,6 +109,7 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
         } catch (Exception e) {
             e.printStackTrace();
 //            throw new IOException(ftpClient.printWorkingDirectory() + " - RETRIEVE " + fileName + " FILE FAILED");
+            logger.log(Level.SEVERE, "exception", e);
             //TODO: подумать как можно избавиться от бесконечного цикла и возвращать дефолтный файл
             return retrieveFile(ApplicationUtils.getSystemAvatarDir());
         }
@@ -122,6 +139,7 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
             }
         } catch (IOException e) {
             e.printStackTrace();
+            logger.log(Level.SEVERE, "exception", e);
             throw new IOException(ftpClient.printWorkingDirectory() + " - STORE " + fileName + " FILE FAILED");
         }
     }

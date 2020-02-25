@@ -1,14 +1,12 @@
-package com.excalibur.ftp.entity.response.body;
+package com.excalibur.ftp.entity.response;
 
-import java.util.List;
-
-public class FTPStoreResult extends Result {
+public class StoreResponseBody extends ResponseBody {
 
     private String key;
     private String fileName;
 
-    public FTPStoreResult(boolean success, String fileName, String key, List<String> errors) {
-        super(success, errors);
+    public StoreResponseBody(boolean success, String fileName, String key, String message) {
+        super(success, message);
         this.fileName = fileName;
         this.key = key;
     }

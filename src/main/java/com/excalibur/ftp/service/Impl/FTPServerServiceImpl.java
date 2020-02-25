@@ -1,45 +1,79 @@
 package com.excalibur.ftp.service.Impl;
 
-import com.excalibur.ftp.configuration.FTPServerConfiguration;
-import com.excalibur.ftp.entity.response.body.FTPStoreResult;
+import com.excalibur.ftp.entity.response.DeleteResponseBody;
+import com.excalibur.ftp.entity.response.StoreResponseBody;
 import com.excalibur.ftp.repository.FTPServerRepository;
 import com.excalibur.ftp.service.FTPServerService;
 import com.excalibur.ftp.util.ApplicationUtils;
 import com.excalibur.ftp.util.UUIDGenerator;
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
-import org.apache.commons.net.ftp.FTPFileFilters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.*;
+
 import java.util.*;
+import java.util.logging.Logger;
 
 @Service
 public class FTPServerServiceImpl implements FTPServerService {
+
+    private Logger logger = Logger.getLogger(FTPServerServiceImpl.class.getName());
 
     @Autowired
     private FTPServerRepository ftpServerRepository;
 
     @Override
-    public FTPStoreResult createUserFile(String userId, MultipartFile file) throws Exception {
-        String directoryName = ApplicationUtils.getEncryptor().decrypt(userId);
-
-        String originalFilename = file.getOriginalFilename();
-        String extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
-
-        UUID uuid = UUIDGenerator.generateType5UUID(UUID.randomUUID().toString(), directoryName);
-        String generatedFilename = uuid.toString() + extension;
+    public StoreResponseBody createUserFile(String key, MultipartFile file) {
         try {
+            if ( !ApplicationUtils.validateContentType(file.getContentType())) {
+                return new StoreResponseBody(
+                        false,
+                        null,
+                        key,
+                        file.getContentType() + " is not a supported content type"
+                );
+            }
+
+            String directoryName = ApplicationUtils.getEncryptor().decrypt(key);
+
+            String originalFilename = file.getOriginalFilename();
+            String extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
+
+            UUID uuid = UUIDGenerator.generateType5UUID(UUID.randomUUID().toString(), directoryName);
+            String generatedFilename = uuid.toString() + extension;
             ftpServerRepository.storeFile("user/" + directoryName, generatedFilename, file.getBytes());
-            return new FTPStoreResult(true, generatedFilename, userId, null);
-        } catch (IOException e) {
+            return new StoreResponseBody(
+                    true,
+                    generatedFilename,
+                    ApplicationUtils.getEncryptor().encrypt(directoryName),
+                    null
+            );
+        } catch (Exception e) {
             e.printStackTrace();
-            List<String> errors = new ArrayList<>();
-            errors.add(e.getMessage());
-            return new FTPStoreResult(false, generatedFilename, userId, errors);
+            return new StoreResponseBody(
+                    false,
+                    null,
+                    key,
+                    e.getMessage()
+            );
+        }
+    }
+
+    @Override
+    public DeleteResponseBody deleteFile(String key, String fileName) {
+        try {
+            String directory = ApplicationUtils.getEncryptor().decrypt(key);
+            ftpServerRepository.deleteFile("user/" + directory, fileName);
+            return new DeleteResponseBody(
+                    true,
+                    null
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new DeleteResponseBody(
+                    false,
+                    e.getMessage()
+            );
         }
     }
 

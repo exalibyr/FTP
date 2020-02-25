@@ -11,6 +11,6 @@ public interface FTPServerRepository {
 
     void storeFile(String dirName, String fileName, byte[] fileContent) throws Exception;
 
-    void deleteFile(String directory, String name);
+    void deleteFile(String directory, String name) throws Exception;
 
 }
