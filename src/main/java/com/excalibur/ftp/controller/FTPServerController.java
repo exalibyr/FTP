@@ -1,10 +1,9 @@
 package com.excalibur.ftp.controller;
 
-import com.excalibur.ftp.entity.response.DeleteResponseBody;
-import com.excalibur.ftp.entity.response.StoreResponseBody;
-import com.excalibur.ftp.repository.FTPServerRepository;
+import com.excalibur.ftp.response.entity.DeleteResponseBody;
+import com.excalibur.ftp.response.entity.StoreResponseBody;
 import com.excalibur.ftp.service.FTPServerService;
-import com.excalibur.ftp.util.ResponseBuilder;
+import com.excalibur.ftp.response.ResponseBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,12 +23,12 @@ public class FTPServerController {
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, value = "/user/{key}", produces = "application/json")
     public ResponseEntity<StoreResponseBody> postFile(@PathVariable(name = "key") String key,
-                                                      @RequestParam(name = "file") MultipartFile file,
-                                                      @RequestHeader(name = "token", required = false) String token) {
+                           @RequestParam(name = "file") MultipartFile file,
+                           @RequestHeader(name = "token", required = false) String token) {
         StoreResponseBody responseBody = ftpService.createUserFile(key, file);
         logger.log(Level.INFO, "FILE STORED", responseBody);
         return ResponseBuilder.buildStoreResponse(responseBody);
-    }
+        }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/user/{key}")
     public ResponseEntity<DeleteResponseBody> deleteFile(@PathVariable(name = "key") String key,

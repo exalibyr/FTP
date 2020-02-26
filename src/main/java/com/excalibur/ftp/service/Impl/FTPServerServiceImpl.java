@@ -1,7 +1,7 @@
 package com.excalibur.ftp.service.Impl;
 
-import com.excalibur.ftp.entity.response.DeleteResponseBody;
-import com.excalibur.ftp.entity.response.StoreResponseBody;
+import com.excalibur.ftp.response.entity.DeleteResponseBody;
+import com.excalibur.ftp.response.entity.StoreResponseBody;
 import com.excalibur.ftp.repository.FTPServerRepository;
 import com.excalibur.ftp.service.FTPServerService;
 import com.excalibur.ftp.util.ApplicationUtils;
@@ -36,11 +36,11 @@ public class FTPServerServiceImpl implements FTPServerService {
 
             String directoryName = ApplicationUtils.getEncryptor().decrypt(key);
 
-            String originalFilename = file.getOriginalFilename();
-            String extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
 
-            UUID uuid = UUIDGenerator.generateType5UUID(UUID.randomUUID().toString(), directoryName);
-            String generatedFilename = uuid.toString() + extension;
+        UUID uuid = UUIDGenerator.generateType5UUID(UUID.randomUUID().toString(), directoryName);
+        String generatedFilename = uuid.toString() + extension;
             ftpServerRepository.storeFile("user/" + directoryName, generatedFilename, file.getBytes());
             return new StoreResponseBody(
                     true,

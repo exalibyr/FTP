@@ -1,7 +1,7 @@
 package com.excalibur.ftp.service;
 
-import com.excalibur.ftp.entity.response.DeleteResponseBody;
-import com.excalibur.ftp.entity.response.StoreResponseBody;
+import com.excalibur.ftp.response.entity.DeleteResponseBody;
+import com.excalibur.ftp.response.entity.StoreResponseBody;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 

@@ -1,7 +1,7 @@
-package com.excalibur.ftp.util;
+package com.excalibur.ftp.response;
 
-import com.excalibur.ftp.entity.response.DeleteResponseBody;
-import com.excalibur.ftp.entity.response.StoreResponseBody;
+import com.excalibur.ftp.response.entity.DeleteResponseBody;
+import com.excalibur.ftp.response.entity.StoreResponseBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 

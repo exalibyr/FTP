@@ -33,6 +33,8 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
         }
     }
 
+
+
     @Override
     public byte[] retrieveFile(String dirName) throws Exception {
         if ( !ftpClient.isConnected()) restoreConnection();

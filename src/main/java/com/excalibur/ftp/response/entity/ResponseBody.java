@@ -1,4 +1,4 @@
-package com.excalibur.ftp.entity.response;
+package com.excalibur.ftp.response.entity;
 
 
 public abstract class ResponseBody {
