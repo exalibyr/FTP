@@ -1,11 +1,14 @@
 package com.excalibur.ftp.controller;
 
 import com.excalibur.ftp.response.entity.DeleteResponseBody;
+import com.excalibur.ftp.response.entity.ResponseBody;
 import com.excalibur.ftp.response.entity.StoreResponseBody;
 import com.excalibur.ftp.service.FTPServerService;
 import com.excalibur.ftp.response.ResponseBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.MultipartBodyBuilder;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,13 +25,28 @@ public class FTPServerController {
 
     @CrossOrigin
     @RequestMapping(method = RequestMethod.POST, value = "/user/{key}", produces = "application/json")
-    public ResponseEntity<StoreResponseBody> postFile(@PathVariable(name = "key") String key,
-                           @RequestParam(name = "file") MultipartFile file,
-                           @RequestHeader(name = "token", required = false) String token) {
-        StoreResponseBody responseBody = ftpService.createUserFile(key, file);
-        logger.log(Level.INFO, "FILE STORED", responseBody);
-        return ResponseBuilder.buildStoreResponse(responseBody);
+    public ResponseEntity postFile(@PathVariable(name = "key") String key,
+                                                 @RequestParam(name = "mediaType", required = false) String mediaType,
+                                                 @RequestParam(name = "file", required = false) MultipartFile multipartFile,
+                                                 @RequestBody(required = false) byte[] file,
+                                                 @RequestHeader(name = "token", required = false) String token) {
+        StoreResponseBody responseBody = null;
+        try {
+            if (multipartFile != null) {
+                responseBody = this.ftpService.createUserFile(key, multipartFile.getContentType(), multipartFile.getBytes());
+            } else if (file != null) {
+                responseBody = this.ftpService.createUserFile(key, mediaType, file);
+            } else {
+                throw new MissingServletRequestParameterException("mediaType, file, body", "String, MultipartFile, byte[]");
+            }
+            logger.log(Level.INFO, "FILE STORED", responseBody);
+            return ResponseBuilder.buildStoreResponse(responseBody);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.log(Level.SEVERE, "exception", e);
+            return ResponseBuilder.buildErrorResponse(e.getMessage());
         }
+    }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/user/{key}")
     public ResponseEntity<DeleteResponseBody> deleteFile(@PathVariable(name = "key") String key,

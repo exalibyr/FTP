@@ -3,16 +3,16 @@ package com.excalibur.ftp.repository.Impl;
 import com.excalibur.ftp.configuration.FTPServerConfiguration;
 import com.excalibur.ftp.repository.FTPServerRepository;
 import com.excalibur.ftp.util.ApplicationUtils;
-import org.apache.commons.net.ftp.FTP;
-import org.apache.commons.net.ftp.FTPClient;
-import org.apache.commons.net.ftp.FTPFile;
-import org.apache.commons.net.ftp.FTPFileFilters;
+import org.apache.commons.net.ftp.*;
 import org.springframework.stereotype.Repository;
 
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLContextSpi;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -22,7 +22,7 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
 
     private Logger logger = Logger.getLogger(FTPServerRepositoryImpl.class.getName());
 
-    private FTPClient ftpClient;
+    private FTPSClient ftpClient;
 
     FTPServerRepositoryImpl() {
         try {
@@ -150,8 +150,12 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
         return ftpClient.changeWorkingDirectory(FTPServerConfiguration.getRootDirectory());
     }
 
-    private void startNewSession() throws IOException {
-        ftpClient = new FTPClient();
+    private void startNewSession() throws IOException, NoSuchAlgorithmException {
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init();
+
+        ftpClient = new FTPSClient();
+        ftpClient.
         ftpClient.connect(FTPServerConfiguration.getServerName(), FTPServerConfiguration.getServerPort());
         if (ftpClient.isConnected()) {
             if ( !ftpClient.login(FTPServerConfiguration.getUserName(), FTPServerConfiguration.getUserPass())) {

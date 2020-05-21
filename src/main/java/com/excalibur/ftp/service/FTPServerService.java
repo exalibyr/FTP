@@ -8,6 +8,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public interface FTPServerService {
 
+    StoreResponseBody createUserFile(String key, String mediaType, byte[] body);
+
     StoreResponseBody createUserFile(String key, MultipartFile file);
 
     DeleteResponseBody deleteFile(String key, String fileName);

@@ -10,11 +10,26 @@ import org.springframework.security.crypto.encrypt.TextEncryptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.LogManager;
 
 public class ApplicationUtils {
 
+    private static Map<String, String> fileExtensionByContentTypeMap = new HashMap<>();
+    private static TextEncryptor textEncryptor;
+
     static {
+        fileExtensionByContentTypeMap.put("image/jpeg", ".jpg");
+        fileExtensionByContentTypeMap.put("image/png", ".png");
+        if (EncryptionConfiguration.getIsActive()) {
+            textEncryptor = Encryptors.text(
+                    EncryptionConfiguration.getPassword(),
+                    EncryptionConfiguration.getSalt()
+            );
+        } else {
+            textEncryptor = Encryptors.noOpText();
+        }
         try (InputStream stream = new FileInputStream("src/main/resources/properties/logging.properties")) {
             LogManager.getLogManager().readConfiguration(stream);
         } catch (IOException e) {
@@ -26,13 +41,8 @@ public class ApplicationUtils {
         blog
     }
 
-    private static final TextEncryptor TEXT_ENCRYPTOR = Encryptors.text(
-            EncryptionConfiguration.getPassword(),
-            EncryptionConfiguration.getSalt()
-    );
-
     public static TextEncryptor getEncryptor() {
-        return TEXT_ENCRYPTOR;
+        return textEncryptor;
     }
 
     public static String getApiKey(Endpoint endpoint) {
@@ -58,7 +68,11 @@ public class ApplicationUtils {
     }
 
     public static Boolean validateContentType(@Nullable String contentType) {
-        return contentType != null && (contentType.equals("image/jpeg") || contentType.equals("image/png"));
+        return contentType != null && fileExtensionByContentTypeMap.containsKey(contentType);
+    }
+
+    public static String generateFileExtension(String contentType) {
+        return fileExtensionByContentTypeMap.get(contentType);
     }
 
 }

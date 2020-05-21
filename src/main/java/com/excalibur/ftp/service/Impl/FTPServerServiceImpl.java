@@ -23,6 +23,41 @@ public class FTPServerServiceImpl implements FTPServerService {
     private FTPServerRepository ftpServerRepository;
 
     @Override
+    public StoreResponseBody createUserFile(String key, String mediaType, byte[] body) {
+        try {
+            if ( !ApplicationUtils.validateContentType(mediaType)) {
+                return new StoreResponseBody(
+                        false,
+                        null,
+                        key,
+                        mediaType + " is not a supported content type"
+                );
+            }
+
+            String directoryName = ApplicationUtils.getEncryptor().decrypt(key);
+            String extension = ApplicationUtils.generateFileExtension(mediaType);
+            UUID uuid = UUIDGenerator.generateType5UUID(UUID.randomUUID().toString(), directoryName);
+            String generatedFilename = uuid.toString() + extension;
+
+            ftpServerRepository.storeFile("user/" + directoryName, generatedFilename, body);
+            return new StoreResponseBody(
+                    true,
+                    generatedFilename,
+                    ApplicationUtils.getEncryptor().encrypt(directoryName),
+                    null
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new StoreResponseBody(
+                    false,
+                    null,
+                    key,
+                    e.getMessage()
+            );
+        }
+    }
+
+    @Override
     public StoreResponseBody createUserFile(String key, MultipartFile file) {
         try {
             if ( !ApplicationUtils.validateContentType(file.getContentType())) {
@@ -35,12 +70,10 @@ public class FTPServerServiceImpl implements FTPServerService {
             }
 
             String directoryName = ApplicationUtils.getEncryptor().decrypt(key);
+            String extension = ApplicationUtils.generateFileExtension(file.getContentType());
+            UUID uuid = UUIDGenerator.generateType5UUID(UUID.randomUUID().toString(), directoryName);
+            String generatedFilename = uuid.toString() + extension;
 
-        String originalFilename = file.getOriginalFilename();
-        String extension = originalFilename.substring(originalFilename.lastIndexOf('.'));
-
-        UUID uuid = UUIDGenerator.generateType5UUID(UUID.randomUUID().toString(), directoryName);
-        String generatedFilename = uuid.toString() + extension;
             ftpServerRepository.storeFile("user/" + directoryName, generatedFilename, file.getBytes());
             return new StoreResponseBody(
                     true,

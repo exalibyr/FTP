@@ -9,6 +9,7 @@ public class EncryptionConfiguration {
 
     private static String password;
     private static String salt;
+    private static Boolean isActive;
 
     static {
         Properties properties = new Properties();
@@ -16,6 +17,7 @@ public class EncryptionConfiguration {
             properties.load(stream);
             password = properties.getProperty("encryption.password");
             salt = properties.getProperty("encryption.salt");
+            isActive = Boolean.valueOf(properties.getProperty("encryption.active"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -27,5 +29,9 @@ public class EncryptionConfiguration {
 
     public static String getSalt() {
         return salt;
+    }
+
+    public static Boolean getIsActive() {
+        return isActive;
     }
 }
