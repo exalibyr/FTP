@@ -22,7 +22,7 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
 
     private Logger logger = Logger.getLogger(FTPServerRepositoryImpl.class.getName());
 
-    private FTPSClient ftpClient;
+    private FTPClient ftpClient;
 
     FTPServerRepositoryImpl() {
         try {
@@ -150,15 +150,11 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
         return ftpClient.changeWorkingDirectory(FTPServerConfiguration.getRootDirectory());
     }
 
-    private void startNewSession() throws IOException, NoSuchAlgorithmException {
-        SSLContext sslContext = SSLContext.getInstance("TLS");
-        sslContext.init();
-
-        ftpClient = new FTPSClient();
-        ftpClient.
-        ftpClient.connect(FTPServerConfiguration.getServerName(), FTPServerConfiguration.getServerPort());
-        if (ftpClient.isConnected()) {
-            if ( !ftpClient.login(FTPServerConfiguration.getUserName(), FTPServerConfiguration.getUserPass())) {
+    private void startNewSession() throws IOException {
+        this.ftpClient = new FTPClient();
+        this.ftpClient.connect(FTPServerConfiguration.getServerName(), FTPServerConfiguration.getServerPort());
+        if (this.ftpClient.isConnected()) {
+            if ( !this.ftpClient.login(FTPServerConfiguration.getUserName(), FTPServerConfiguration.getUserPass())) {
                 throw new IOException("LOGIN FAILED");
             }
         } else {

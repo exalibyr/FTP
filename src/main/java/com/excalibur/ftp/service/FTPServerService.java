@@ -14,7 +14,7 @@ public interface FTPServerService {
 
     DeleteResponseBody deleteFile(String key, String fileName);
 
-    byte[] getUserFile(String userId, String filename) throws Exception;
+    byte[] getUserFile(String key, String filename) throws Exception;
 
     byte[] getSystemFile(String resource) throws Exception;
 

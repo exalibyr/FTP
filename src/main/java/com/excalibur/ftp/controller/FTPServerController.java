@@ -34,7 +34,7 @@ public class FTPServerController {
         try {
             if (multipartFile != null) {
                 responseBody = this.ftpService.createUserFile(key, multipartFile.getContentType(), multipartFile.getBytes());
-            } else if (file != null) {
+            } else if (file.length > 0 && !mediaType.isBlank()) {
                 responseBody = this.ftpService.createUserFile(key, mediaType, file);
             } else {
                 throw new MissingServletRequestParameterException("mediaType, file, body", "String, MultipartFile, byte[]");
@@ -56,11 +56,11 @@ public class FTPServerController {
         return ResponseBuilder.buildDeleteResponse(responseBody);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/user/{userId}/{fileName}")
-    public byte[] getFile(@PathVariable(name = "userId") String userId,
+    @RequestMapping(method = RequestMethod.GET, value = "/user/{key}/{fileName}")
+    public byte[] getFile(@PathVariable(name = "key") String key,
                           @PathVariable(name = "fileName") String fileName) {
         try {
-            return ftpService.getUserFile(userId, fileName);
+            return ftpService.getUserFile(key, fileName);
         } catch (Exception e) {
             e.printStackTrace();
             logger.log(Level.SEVERE, "exception", e);

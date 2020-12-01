@@ -111,8 +111,8 @@ public class FTPServerServiceImpl implements FTPServerService {
     }
 
     @Override
-    public byte[] getUserFile(String userId, String filename) throws Exception {
-        return ftpServerRepository.retrieveFile("user/" + ApplicationUtils.getEncryptor().decrypt(userId), filename);
+    public byte[] getUserFile(String key, String filename) throws Exception {
+        return ftpServerRepository.retrieveFile("user/" + ApplicationUtils.getEncryptor().decrypt(key), filename);
     }
 
     @Override
