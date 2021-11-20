@@ -1,0 +1,27 @@
+configuration:
+  name: dev
+  monitorInterval: 30
+  status: warn
+  properties:
+    property:
+      - name: appName
+        value: FTP integration service
+      - name: ConsolePattern
+        value: '%date %-5level [%thread] %class{1.}#%method %msg%n%exception'
+  appenders:
+    console:
+      name: CONSOLE
+      target: SYSTEM_OUT
+      patternLayout:
+        pattern: ${ConsolePattern}
+  loggers:
+    root:
+      level: INFO
+      appenderRef:
+        ref: CONSOLE
+    logger:
+      -
+        name: com.excalibur.ftp.configuration.ApplicationContext
+        additivity: true
+        level: INFO
+

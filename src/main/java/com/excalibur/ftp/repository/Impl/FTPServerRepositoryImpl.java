@@ -1,39 +1,28 @@
 package com.excalibur.ftp.repository.Impl;
 
-import com.excalibur.ftp.configuration.FTPServerConfiguration;
+import com.excalibur.ftp.configuration.proxy.FTPServerConfigurationProxy;
 import com.excalibur.ftp.repository.FTPServerRepository;
 import com.excalibur.ftp.util.ApplicationUtils;
 import org.apache.commons.net.ftp.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLContextSpi;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+@Deprecated
 @Repository
 public class FTPServerRepositoryImpl implements FTPServerRepository {
 
+    @Autowired
+    private FTPServerConfigurationProxy ftpServerConfigurationProxy;
+
     private Logger logger = Logger.getLogger(FTPServerRepositoryImpl.class.getName());
 
-    private FTPClient ftpClient;
-
-    FTPServerRepositoryImpl() {
-        try {
-            startNewSession();
-        } catch (Exception e) {
-            e.printStackTrace();
-            logger.log(Level.SEVERE, "exception", e);
-        }
-    }
-
-
+    private FTPSClient ftpClient = new FTPSClient();
 
     @Override
     public byte[] retrieveFile(String dirName) throws Exception {
@@ -45,7 +34,7 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
                 throw new IOException(ftpClient.printWorkingDirectory() + " - CHANGE TO " + dirName + " DIR FAILED");
             }
         } else {
-            throw new IOException(ftpClient.printWorkingDirectory() + " - CHANGE TO " + FTPServerConfiguration.getRootDirectory() + " DIR FAILED");
+            throw new IOException(ftpClient.printWorkingDirectory() + " - CHANGE TO " + ftpServerConfigurationProxy.getRootDirectory() + " DIR FAILED");
         }
     }
 
@@ -55,13 +44,13 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
         if (changeToRootDir()) {
             if (ftpClient.changeWorkingDirectory(dirName)) {
                 return retrieveSingleFile(fileName);
-            } else if (ftpClient.changeWorkingDirectory(ApplicationUtils.getSystemAvatarDir())) {
+            } else if (ftpClient.changeWorkingDirectory(ftpServerConfigurationProxy.getSystemDirectory() + ftpServerConfigurationProxy.getAvatarDirectory())) {
                 return retrieveSingleFile();
             } else {
                 throw new IOException(ftpClient.printWorkingDirectory() + " - CHANGE TO " + dirName + " DIR FAILED");
             }
         } else {
-            throw new IOException(ftpClient.printWorkingDirectory() + " - CHANGE TO " + FTPServerConfiguration.getRootDirectory() + " DIR FAILED");
+            throw new IOException(ftpClient.printWorkingDirectory() + " - CHANGE TO " + ftpServerConfigurationProxy.getRootDirectory() + " DIR FAILED");
         }
     }
 
@@ -77,7 +66,7 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
                 throw new IOException(ftpClient.printWorkingDirectory() + " - CHANGE TO " + directory + " DIR FAILED");
             }
         } else {
-            throw new IOException(ftpClient.printWorkingDirectory() + " - CHANGE TO " + FTPServerConfiguration.getRootDirectory() + " DIR FAILED");
+            throw new IOException(ftpClient.printWorkingDirectory() + " - CHANGE TO " + ftpServerConfigurationProxy.getRootDirectory() + " DIR FAILED");
         }
     }
 
@@ -99,7 +88,7 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
                 }
             }
         } else {
-            throw new IOException(ftpClient.printWorkingDirectory() + " - CHANGE TO " + FTPServerConfiguration.getRootDirectory() + " DIR FAILED");
+            throw new IOException(ftpClient.printWorkingDirectory() + " - CHANGE TO " + ftpServerConfigurationProxy.getRootDirectory() + " DIR FAILED");
         }
     }
 
@@ -113,7 +102,7 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
 //            throw new IOException(ftpClient.printWorkingDirectory() + " - RETRIEVE " + fileName + " FILE FAILED");
             logger.log(Level.SEVERE, "exception", e);
             //TODO: подумать как можно избавиться от бесконечного цикла и возвращать дефолтный файл
-            return retrieveFile(ApplicationUtils.getSystemAvatarDir());
+            return retrieveFile(ftpServerConfigurationProxy.getSystemDirectory() + ftpServerConfigurationProxy.getAvatarDirectory());
         }
     }
 
@@ -147,14 +136,15 @@ public class FTPServerRepositoryImpl implements FTPServerRepository {
     }
 
     private Boolean changeToRootDir() throws IOException{
-        return ftpClient.changeWorkingDirectory(FTPServerConfiguration.getRootDirectory());
+        return ftpClient.changeWorkingDirectory(ftpServerConfigurationProxy.getRootDirectory());
     }
 
-    private void startNewSession() throws IOException {
-        this.ftpClient = new FTPClient();
-        this.ftpClient.connect(FTPServerConfiguration.getServerName(), FTPServerConfiguration.getServerPort());
-        if (this.ftpClient.isConnected()) {
-            if ( !this.ftpClient.login(FTPServerConfiguration.getUserName(), FTPServerConfiguration.getUserPass())) {
+    private void startNewSession() throws IOException{
+
+        ftpClient = new FTPSClient();
+        ftpClient.connect(ftpServerConfigurationProxy.getServerName(), ftpServerConfigurationProxy.getServerPort());
+        if (ftpClient.isConnected()) {
+            if ( !ftpClient.login(ftpServerConfigurationProxy.getUserName(), ftpServerConfigurationProxy.getUserPass())) {
                 throw new IOException("LOGIN FAILED");
             }
         } else {

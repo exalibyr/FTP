@@ -1,5 +1,5 @@
 package com.excalibur.ftp.response.entity;
-
+@Deprecated
 public class StoreResponseBody extends ResponseBody {
 
     private String key;

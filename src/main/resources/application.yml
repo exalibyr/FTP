@@ -1,0 +1,28 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 25MB
+
+server:
+  port: 8082
+
+auth:
+  name: Auth-token
+  value: b34992b8-5f8b-414d-8535-cd8f4eba78be
+  active: false
+
+repository:
+  host: 127.0.0.1
+  port: 21
+  root-path: /
+  user:
+    name: FTP Integration
+    password: WHPSy7yYyeOTKpSvxO5D
+  storages:
+    -
+      tag: WEB
+      path: web
+    -
+      tag: LOCAL
+      path: local

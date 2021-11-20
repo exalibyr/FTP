@@ -1,5 +1,6 @@
 package com.excalibur.ftp.service.Impl;
 
+import com.excalibur.ftp.configuration.proxy.FTPServerConfigurationProxy;
 import com.excalibur.ftp.response.entity.DeleteResponseBody;
 import com.excalibur.ftp.response.entity.StoreResponseBody;
 import com.excalibur.ftp.repository.FTPServerRepository;
@@ -14,8 +15,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.*;
 import java.util.logging.Logger;
 
+@Deprecated
 @Service
 public class FTPServerServiceImpl implements FTPServerService {
+
+    @Autowired
+    private FTPServerConfigurationProxy ftpServerConfigurationProxy;
 
     private Logger logger = Logger.getLogger(FTPServerServiceImpl.class.getName());
 
@@ -111,12 +116,12 @@ public class FTPServerServiceImpl implements FTPServerService {
     }
 
     @Override
-    public byte[] getUserFile(String key, String filename) throws Exception {
-        return ftpServerRepository.retrieveFile("user/" + ApplicationUtils.getEncryptor().decrypt(key), filename);
+    public byte[] getUserFile(String userId, String filename) throws Exception {
+        return ftpServerRepository.retrieveFile("user/" + ApplicationUtils.getEncryptor().decrypt(userId), filename);
     }
 
     @Override
     public byte[] getSystemFile(String resource) throws Exception {
-        return ftpServerRepository.retrieveFile(ApplicationUtils.getSystemDirectory(resource));
+        return ftpServerRepository.retrieveFile(ftpServerConfigurationProxy.getSystemDirectory() + "/" + resource);
     }
 }

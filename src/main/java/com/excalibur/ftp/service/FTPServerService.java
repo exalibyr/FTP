@@ -5,6 +5,7 @@ import com.excalibur.ftp.response.entity.StoreResponseBody;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+@Deprecated
 @Service
 public interface FTPServerService {
 
@@ -14,7 +15,7 @@ public interface FTPServerService {
 
     DeleteResponseBody deleteFile(String key, String fileName);
 
-    byte[] getUserFile(String key, String filename) throws Exception;
+    byte[] getUserFile(String userId, String filename) throws Exception;
 
     byte[] getSystemFile(String resource) throws Exception;
 

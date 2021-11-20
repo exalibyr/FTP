@@ -5,7 +5,7 @@ import com.excalibur.ftp.response.entity.ErrorResponseBody;
 import com.excalibur.ftp.response.entity.StoreResponseBody;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
+@Deprecated
 public class ResponseBuilder {
 
     public static ResponseEntity<StoreResponseBody> buildStoreResponse(StoreResponseBody responseBody) {

@@ -2,6 +2,7 @@ package com.excalibur.ftp.repository;
 
 import org.springframework.stereotype.Repository;
 
+@Deprecated
 @Repository
 public interface FTPServerRepository {
 

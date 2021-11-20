@@ -2,7 +2,7 @@ package com.excalibur.ftp.util;
 
 import com.excalibur.ftp.configuration.BlogAppConfiguration;
 import com.excalibur.ftp.configuration.EncryptionConfiguration;
-import com.excalibur.ftp.configuration.FTPServerConfiguration;
+import com.excalibur.ftp.configuration.proxy.FTPServerConfigurationProxy;
 import org.springframework.lang.Nullable;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
@@ -57,14 +57,6 @@ public class ApplicationUtils {
             case blog: return BlogAppConfiguration.getToken().equals(getEncryptor().decrypt(token));
             default: return false;
         }
-    }
-
-    public static String getSystemDirectory(String name) {
-        return FTPServerConfiguration.getSystemDirectory() + "/" + name;
-    }
-
-    public static String getSystemAvatarDir() {
-        return FTPServerConfiguration.getSystemDirectory() + FTPServerConfiguration.getAvatarDirectory();
     }
 
     public static Boolean validateContentType(@Nullable String contentType) {

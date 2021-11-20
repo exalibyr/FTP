@@ -1,6 +1,6 @@
 package com.excalibur.ftp.response.entity;
 
-
+@Deprecated
 public abstract class ResponseBody {
 
     private boolean success;

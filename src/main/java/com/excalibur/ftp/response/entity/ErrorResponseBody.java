@@ -1,5 +1,5 @@
 package com.excalibur.ftp.response.entity;
-
+@Deprecated
 public class ErrorResponseBody extends ResponseBody {
 
     public ErrorResponseBody() {
