@@ -61,10 +61,14 @@ public class FTPIntegrationController {
     }
 
     @GetMapping(value = "file")
-    public byte[] getFile(@RequestParam(name = "name") String fileName) {
-        return fileService
-                .download(String.format("/%s/%s", getStoragePath(), fileName))
-                .getContent();
+    public ResponseEntity<FileData> getFile(@RequestParam(name = "name") String fileName) {
+        FileData downloadedFile = fileService.download(String.format("/%s/%s", getStoragePath(), fileName));
+        return ResponseEntity.ok(downloadedFile);
+    }
+
+    @DeleteMapping(value = "file")
+    public void deleteFile(@RequestParam(name = "name") String fileName) {
+        fileService.delete(String.format("/%s/%s", getStoragePath(), fileName));
     }
 
     @ExceptionHandler(FTPIntegrationClientException.class)

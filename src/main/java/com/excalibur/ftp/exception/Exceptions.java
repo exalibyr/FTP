@@ -34,6 +34,10 @@ public final class Exceptions {
         return internalServerError(null);
     }
 
+    public static RuntimeException runtimeException(String messageTemplate, Object... args) {
+        return new RuntimeException(messageTemplate == null ? "" : String.format(messageTemplate, args));
+    }
+
     public static IllegalArgumentException illegalArgument(Object actualValue) {
         return new IllegalArgumentException(String.format("Argument can't be %s", actualValue));
     }

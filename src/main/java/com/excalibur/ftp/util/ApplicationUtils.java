@@ -2,17 +2,11 @@ package com.excalibur.ftp.util;
 
 import com.excalibur.ftp.configuration.BlogAppConfiguration;
 import com.excalibur.ftp.configuration.EncryptionConfiguration;
-import com.excalibur.ftp.configuration.proxy.FTPServerConfigurationProxy;
 import org.springframework.lang.Nullable;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.encrypt.TextEncryptor;
-
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.LogManager;
 
 public class ApplicationUtils {
 
@@ -29,11 +23,6 @@ public class ApplicationUtils {
             );
         } else {
             textEncryptor = Encryptors.noOpText();
-        }
-        try (InputStream stream = new FileInputStream("src/main/resources/properties/logging.properties")) {
-            LogManager.getLogManager().readConfiguration(stream);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

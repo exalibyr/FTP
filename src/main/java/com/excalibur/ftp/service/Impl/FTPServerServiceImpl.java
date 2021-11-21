@@ -1,31 +1,31 @@
 package com.excalibur.ftp.service.Impl;
 
+import com.excalibur.ftp.configuration.RepositoryConfiguration;
 import com.excalibur.ftp.configuration.proxy.FTPServerConfigurationProxy;
+import com.excalibur.ftp.model.FileData;
 import com.excalibur.ftp.response.entity.DeleteResponseBody;
 import com.excalibur.ftp.response.entity.StoreResponseBody;
-import com.excalibur.ftp.repository.FTPServerRepository;
 import com.excalibur.ftp.service.FTPServerService;
+import com.excalibur.ftp.service.FileDataService;
 import com.excalibur.ftp.util.ApplicationUtils;
-import com.excalibur.ftp.util.UUIDGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-
-import java.util.*;
-import java.util.logging.Logger;
 
 @Deprecated
 @Service
 public class FTPServerServiceImpl implements FTPServerService {
 
     @Autowired
-    private FTPServerConfigurationProxy ftpServerConfigurationProxy;
-
-    private Logger logger = Logger.getLogger(FTPServerServiceImpl.class.getName());
+    private RepositoryConfiguration config;
 
     @Autowired
-    private FTPServerRepository ftpServerRepository;
+    private FileDataService fileService;
+
+    @Autowired
+    private FTPServerConfigurationProxy ftpServerConfigurationProxy;
+
+    private String storagePath;
 
     @Override
     public StoreResponseBody createUserFile(String key, String mediaType, byte[] body) {
@@ -40,14 +40,15 @@ public class FTPServerServiceImpl implements FTPServerService {
             }
 
             String directoryName = ApplicationUtils.getEncryptor().decrypt(key);
-            String extension = ApplicationUtils.generateFileExtension(mediaType);
-            UUID uuid = UUIDGenerator.generateType5UUID(UUID.randomUUID().toString(), directoryName);
-            String generatedFilename = uuid.toString() + extension;
 
-            ftpServerRepository.storeFile("user/" + directoryName, generatedFilename, body);
+            FileData fileData = FileData.builder().contentType(mediaType).content(body)
+                    .location(getStoragePath() + "/user/" + directoryName).build();
+
+            String path = fileService.upload(fileData);
+
             return new StoreResponseBody(
                     true,
-                    generatedFilename,
+                    path.substring(path.lastIndexOf("/") + 1),
                     ApplicationUtils.getEncryptor().encrypt(directoryName),
                     null
             );
@@ -75,14 +76,15 @@ public class FTPServerServiceImpl implements FTPServerService {
             }
 
             String directoryName = ApplicationUtils.getEncryptor().decrypt(key);
-            String extension = ApplicationUtils.generateFileExtension(file.getContentType());
-            UUID uuid = UUIDGenerator.generateType5UUID(UUID.randomUUID().toString(), directoryName);
-            String generatedFilename = uuid.toString() + extension;
 
-            ftpServerRepository.storeFile("user/" + directoryName, generatedFilename, file.getBytes());
+            FileData fileData = FileData.builder().content(file.getBytes()).contentType(file.getContentType())
+                    .location(getStoragePath() + "/user/" + directoryName).build();
+
+            String path = fileService.upload(fileData);
+
             return new StoreResponseBody(
                     true,
-                    generatedFilename,
+                    path.substring(path.lastIndexOf("/") + 1),
                     ApplicationUtils.getEncryptor().encrypt(directoryName),
                     null
             );
@@ -101,7 +103,9 @@ public class FTPServerServiceImpl implements FTPServerService {
     public DeleteResponseBody deleteFile(String key, String fileName) {
         try {
             String directory = ApplicationUtils.getEncryptor().decrypt(key);
-            ftpServerRepository.deleteFile("user/" + directory, fileName);
+
+            fileService.delete(getStoragePath() + "/user/" + directory);
+
             return new DeleteResponseBody(
                     true,
                     null
@@ -117,11 +121,38 @@ public class FTPServerServiceImpl implements FTPServerService {
 
     @Override
     public byte[] getUserFile(String userId, String filename) throws Exception {
-        return ftpServerRepository.retrieveFile("user/" + ApplicationUtils.getEncryptor().decrypt(userId), filename);
+        String path = new StringBuilder()
+                .append(getStoragePath())
+                .append("/user/")
+                .append(ApplicationUtils.getEncryptor().decrypt(userId))
+                .append("/")
+                .append(filename)
+                .toString();
+
+        FileData data = fileService.download(path);
+
+        return data.getContent();
     }
 
     @Override
     public byte[] getSystemFile(String resource) throws Exception {
-        return ftpServerRepository.retrieveFile(ftpServerConfigurationProxy.getSystemDirectory() + "/" + resource);
+        String path = new StringBuilder()
+                .append(ftpServerConfigurationProxy.getSystemDirectory())
+                .append("/")
+                .append(resource)
+                .toString();
+
+        FileData data = fileService.download(path);
+
+        return data.getContent();
+
     }
+
+    private String getStoragePath() {
+        if (storagePath == null) {
+            storagePath = config.getStoragePath(RepositoryConfiguration.StorageTag.WEB);
+        }
+        return storagePath;
+    }
+
 }

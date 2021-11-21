@@ -43,7 +43,7 @@ public class FileDataService implements FileInterface<FileData, String> {
 
         String path = repository.send(new GenericMessage<>(file.getContent(), new MessageHeaders(headers)), file.getLocation(), FileExistsMode.IGNORE);
         if (path == null) {
-            throw Exceptions.internalServerError("Failed to upload file: %s", file);
+            throw Exceptions.runtimeException("Failed to upload file: %s", file);
         } else {
             return path;
         }
@@ -60,11 +60,21 @@ public class FileDataService implements FileInterface<FileData, String> {
                 return fileStream.toByteArray();
             } catch (IOException e) {
                 log.error(String.format("Failed to read file from %s!", path), e);
-                throw Exceptions.internalServerError();
+                throw Exceptions.runtimeException("Failed to read file from %s!", path);
             }
         });
 
         return FileData.builder().content(fileContent).path(path).build();
+    }
+
+    @Override
+    public void delete(String path) {
+        log.info("Deleting file from: {}", path);
+        Assert.notNull(path, "Path can't be null!");
+
+        boolean successful = repository.remove(path);
+        if (!successful)
+            throw Exceptions.runtimeException("Failed to delete file from %s!", path);
     }
 
     private String generateFileName(FileData fileData) {
