@@ -1,0 +1,45 @@
+configuration:
+  monitoringInterval: 60
+  status: debug
+  properties:
+    property:
+      - name: logFileName
+        value: file-storage-api
+      - name: logPath
+        value: ./logs
+      - name: maxFilesCount
+        value: 10
+
+  appenders:
+    console:
+      name: console
+      target: SYSTEM_OUT
+      #https://logging.apache.org/log4j/2.x/manual/layouts.html#PatternLayout
+      patternLayout:
+        pattern: '%date %level %logger:%L [%T] [%thread] %message%n'
+
+    #https://logging.apache.org/log4j/2.x/manual/appenders.html#RollingFileAppender
+    rollingFile:
+      - name: commonLog
+        fileName: ${logPath}/common/${logFileName}.log
+        filePattern: ${logPath}/common/${logFileName}_%d{yyyy-MM-dd}_%i.log
+        patternLayout:
+          pattern: '%date %level %logger:%L [%T] [%thread] %message%n'
+        policies:
+          sizeBasedTriggeringPolicy:
+            size: 100 MB
+        defaultRolloverStrategy:
+          fileIndex: min
+          max: ${maxFilesCount}
+  loggers:
+    root:
+      level: info
+      appenderRef:
+        - ref: console
+        - ref: commonLog
+    logger:
+      - name: org.springframework
+        level: error
+        additivity: false
+        appenderRef:
+          - ref: console
